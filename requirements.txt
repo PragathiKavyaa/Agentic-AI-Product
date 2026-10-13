@@ -1,0 +1,13 @@
+Django>=5.2,<5.3
+psycopg[binary]>=3.2
+python-dotenv>=1.0
+redis>=5.0
+langchain>=0.3
+langgraph>=0.2
+# Optional provider integrations (install only if you plan to use them):
+# langchain-openai>=0.3
+# langchain-google-genai>=2.0
+# langchain-ollama>=0.2
+
+gunicorn
+whitenoise

@@ -1,0 +1,167 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orchestra AI — E-Commerce Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#"><span class="brand-mark">O</span><span>orchestra<span class="brand-ai">.ai</span><small>COMMERCE OPERATIONS</small></span></a>
+    <div class="workspace-label">WORKSPACE</div>
+    <button class="nav-item active" data-section="overview"><span>◫</span> Overview</button>
+    <button class="nav-item" data-section="catalog"><span>▦</span> Product catalog</button>
+    <button class="nav-item" data-section="orders"><span>⇄</span> Orders</button>
+    <button class="nav-item" data-section="approvals"><span>✓</span> Approval queue <b id="approvalBadge">0</b></button>
+    <button class="nav-item" data-section="agents"><span>✳</span> AI agent studio</button>
+    <div class="sidebar-bottom"><div class="status-dot"></div><div><strong>Agent system online</strong><small>Rules engine · Local mode</small></div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><div class="eyebrow">OPERATIONS CENTER / <span id="crumb">OVERVIEW</span></div><h1 id="pageTitle">Good morning, operator <span>✦</span></h1></div><div class="top-actions"><span class="live-pill"><i></i> System operational</span><a href="/admin/" class="admin-link">Django Admin ↗</a><div class="avatar">OP</div></div></header>
+    <section id="overviewSection" class="page-section">
+      <div class="welcome-banner"><div><span class="banner-kicker">YOUR AI OPERATIONS TEAM</span><h2>Commerce, coordinated.</h2><p>One supervisor. Five specialist agents. Your entire operation in sync.</p><button class="primary-btn" id="jumpChat">Talk to your supervisor <span>↗</span></button></div><div class="orbit-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit-core">✳</div><div class="orbit-node node-a">S</div><div class="orbit-node node-b">I</div><div class="orbit-node node-c">CS</div><div class="orbit-node node-d">R</div><div class="orbit-node node-e">A</div></div></div>
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-top"><span>Active products</span><span class="metric-icon lavender">▦</span></div><strong id="metricProducts">—</strong><small>In your catalog</small></div>
+        <div class="metric-card"><div class="metric-top"><span>Orders processed</span><span class="metric-icon blue">⇄</span></div><strong id="metricOrders">—</strong><small>All recorded orders</small></div>
+        <div class="metric-card"><div class="metric-top"><span>Order value</span><span class="metric-icon green">₹</span></div><strong id="metricRevenue">—</strong><small>Excluding cancelled orders</small></div>
+        <div class="metric-card"><div class="metric-top"><span>Low stock alerts</span><span class="metric-icon amber">!</span></div><strong id="metricLow">—</strong><small>At or below reorder level</small></div>
+      </div>
+      <div class="content-grid">
+        <div class="panel chat-panel" id="chatPanel"><div class="panel-heading"><div><span class="section-overline">COMMAND CENTER</span><h3>Ask the supervisor</h3></div><span class="ai-chip">✳ AI ASSISTED</span></div><p class="muted">Your request is routed to the specialist best suited to help.</p>
+          <div class="chat-messages" id="chatMessages"><div class="assistant-message"><div class="message-avatar">✳</div><div><b>Supervisor Agent</b><p>Hi! I can check inventory, guide sales, help with customer support, recommend products, and summarize operations. What would you like to work on?</p></div></div></div>
+          <div class="suggestions"><button data-prompt="Check inventory and low stock">Check inventory</button><button data-prompt="Recommend the best products">Product recommendations</button><button data-prompt="Show analytics and revenue insights">Revenue insights</button><button data-prompt="Help with an order cancellation">Order support</button></div>
+          <form id="chatForm" class="chat-form"><input id="chatInput" placeholder="Ask anything about your store..." autocomplete="off"><button type="submit" aria-label="Send message">↑</button></form><div class="chat-foot"><span>⌁ Connected to catalog knowledge</span><span>Review before taking business actions</span></div>
+        </div>
+        <div class="panel agent-panel"><div class="panel-heading"><div><span class="section-overline">SPECIALIST NETWORK</span><h3>Your agents</h3></div><button class="text-btn" data-go="agents">View all ↗</button></div>
+          <div class="agent-row"><div class="agent-icon sup">✳</div><div class="agent-info"><b>Supervisor Agent</b><small>Routes requests & coordinates</small></div><span class="agent-state">Active</span></div>
+          <div class="agent-row"><div class="agent-icon sales">↗</div><div class="agent-info"><b>Sales Agent</b><small>Product & order guidance</small></div><span class="agent-state">Ready</span></div>
+          <div class="agent-row"><div class="agent-icon inv">▤</div><div class="agent-info"><b>Inventory Agent</b><small>Stock & replenishment alerts</small></div><span class="agent-state">Ready</span></div>
+          <div class="agent-row"><div class="agent-icon cs">♡</div><div class="agent-info"><b>Customer Support</b><small>Returns, delivery & issues</small></div><span class="agent-state">Ready</span></div>
+          <div class="agent-row"><div class="agent-icon rec">✧</div><div class="agent-info"><b>Recommendation Agent</b><small>Catalog discovery & ranking</small></div><span class="agent-state">Ready</span></div>
+          <div class="agent-row"><div class="agent-icon ana">▥</div><div class="agent-info"><b>Analytics Agent</b><small>Business metrics & insights</small></div><span class="agent-state">Ready</span></div>
+        </div>
+      </div>
+      <div class="panel table-panel"><div class="panel-heading"><div><span class="section-overline">CATALOG PULSE</span><h3>Products to watch</h3></div><button class="text-btn" data-go="catalog">Open catalog ↗</button></div><div id="lowStockTable" class="table-wrap"></div></div>
+    </section>
+    <section id="catalogSection" class="page-section hidden">
+      <div class="section-toolbar"><div><span class="section-overline">MERCHANDISING</span><h2>Product catalog</h2><p class="muted">Manage products available to all specialist agents.</p></div><button class="primary-btn" id="showProductForm">＋ Add product</button></div>
+      <div class="panel hidden" id="productFormPanel"><div class="panel-heading"><h3 id="productFormTitle">Add a product</h3><button class="text-btn" id="cancelProductForm">Cancel</button></div><form id="productForm" class="product-form"><input type="hidden" id="productId"><label>Product name<input id="pName" required></label><label>SKU<input id="pSku" required></label><label>Category<input id="pCategory" required placeholder="Skincare"></label><label>Price (₹)<input id="pPrice" type="number" min="0" step=".01" required></label><label>Stock<input id="pStock" type="number" min="0" required value="0"></label><label>Reorder level<input id="pReorder" type="number" min="0" required value="5"></label><label>Rating<input id="pRating" type="number" min="0" max="5" step=".1" value="4.5"></label><label>Image URL (optional)<input id="pImage" type="url"></label><label class="wide">Description<textarea id="pDescription" rows="2"></textarea></label><div class="wide form-actions"><button class="primary-btn" type="submit">Save product</button></div></form></div>
+      <div class="panel"><div class="catalog-toolbar"><input id="productSearch" placeholder="Search products or categories..."><span id="catalogCount" class="muted"></span></div><div id="productGrid" class="product-grid"></div></div>
+    </section>
+    <section id="ordersSection" class="page-section hidden"><div class="section-toolbar"><div><span class="section-overline">FULFILMENT</span><h2>Orders</h2><p class="muted">Order requests are held for review before stock is deducted.</p></div></div><div class="panel"><div id="ordersTable" class="table-wrap"></div></div></section>
+    <section id="approvalsSection" class="page-section hidden"><div class="section-toolbar"><div><span class="section-overline">HUMAN-IN-THE-LOOP</span><h2>Approval queue</h2><p class="muted">AI-suggested business actions stay pending until a reviewer approves them.</p></div></div><div class="panel"><div id="approvalsList" class="approval-list"></div></div></section>
+    <section id="agentsSection" class="page-section hidden"><div class="section-toolbar"><div><span class="section-overline">ORCHESTRATION</span><h2>AI agent studio</h2><p class="muted">Specialist responsibilities and safe execution boundaries.</p></div></div>
+  
+<div class="agent-studio-grid">
+
+    <article class="agent-detail agent-clickable"
+             data-agent="supervisor"
+             data-agent-prompt="Please route this request to the right specialist: show an analytics report with revenue, insights, and performance metrics."
+             tabindex="0"
+             role="button"
+             aria-label="Run Supervisor Agent">
+
+        <div class="agent-icon sup">✳</div>
+        <h3>Supervisor Agent</h3>
+        <p>Coordinates requests and routes them to the appropriate specialist.</p>
+        <span>Orchestration · Click to run</span>
+    </article>
+
+    <article class="agent-detail agent-clickable"
+             data-agent="sales"
+             data-agent-prompt="Check purchase availability for products in the catalog."
+             tabindex="0"
+             role="button"
+             aria-label="Run Sales Agent">
+
+        <div class="agent-icon sales">↗</div>
+        <h3>Sales Agent</h3>
+        <p>Checks product availability and provides purchase guidance.</p>
+        <span>Sales · Click to run</span>
+    </article>
+
+    <article class="agent-detail agent-clickable"
+             data-agent="inventory"
+             data-agent-prompt="Check inventory stock and identify low-stock products."
+             tabindex="0"
+             role="button"
+             aria-label="Run Inventory Agent">
+
+        <div class="agent-icon inv">▤</div>
+        <h3>Inventory Agent</h3>
+        <p>Checks inventory and flags products needing replenishment.</p>
+        <span>Inventory · Click to run</span>
+    </article>
+
+    <article class="agent-detail agent-clickable"
+             data-agent="support"
+             data-agent-prompt="Help with returns, refunds, cancellation, delivery, shipping, tracking, and complaints."
+             tabindex="0"
+             role="button"
+             aria-label="Run Customer Support Agent">
+
+        <div class="agent-icon cs">♡</div>
+        <h3>Customer Support</h3>
+        <p>Provides guidance for returns, refunds, delivery, and complaints.</p>
+        <span>Support · Click to run</span>
+    </article>
+
+    <article class="agent-detail agent-clickable"
+             data-agent="recommendation"
+             data-agent-prompt="Recommend popular products and suggest the best options from the catalog."
+             tabindex="0"
+             role="button"
+             aria-label="Run Recommendation Agent">
+
+        <div class="agent-icon rec">✧</div>
+        <h3>Recommendation Agent</h3>
+        <p>Recommends products based on catalog ratings and availability.</p>
+        <span>Recommendations · Click to run</span>
+    </article>
+
+    <article class="agent-detail agent-clickable"
+             data-agent="analytics"
+             data-agent-prompt="Show an analytics report with revenue, insights, and performance metrics."
+             tabindex="0"
+             role="button"
+             aria-label="Run Analytics Agent">
+
+        <div class="agent-icon ana">▥</div>
+        <h3>Analytics Agent</h3>
+        <p>Summarizes order value, business performance, and inventory metrics.</p>
+        <span>Analytics · Click to run</span>
+    </article>
+
+</div>
+
+    <div id="agentRunOutput" class="panel hidden" aria-live="polite">
+      <h3 id="agentRunTitle">Agent response</h3>
+      <p id="agentRunStatus" class="muted">Waiting for an agent...</p>
+      <div id="agentRunMessage"></div>
+      <pre id="agentRunData" class="agent-run-data"></pre>
+    </div>
+
+    <div class="panel integration-panel">
+      <span class="section-overline">INTEGRATION NOTES</span>
+      <h3>Provider-ready architecture</h3>
+      <p>The default demo uses deterministic Python agents and PostgreSQL catalog retrieval so it runs without API credentials. LangChain/LangGraph, GPT/Gemini/Llama, vector search, MCP tools, and Redis are extension points—not active remote services until configured.</p>
+      <div class="integration-tags">
+        <span>Python / Django</span>
+        <span>PostgreSQL</span>
+        <span>LangGraph-ready</span>
+        <span>RAG baseline</span>
+        <span>Redis-ready</span>
+        <span>MCP-ready</span>
+      </div>
+    </div>
+  </section>
+    <footer>ORCHESTRA.AI <span>Built for thoughtful automation · Human approval for sensitive actions</span></footer>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="{% static 'js/app.js' %}"></script>
+</body></html>

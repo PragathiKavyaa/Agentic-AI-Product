@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ecommerce_agents
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommerce_agents"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  web:
+    build: .
+    command: sh -c "python manage.py makemigrations operations && python manage.py migrate && python manage.py seed_demo && python manage.py runserver 0.0.0.0:8000"
+    ports: ["8000:8000"]
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: "local-development-key-change-me"
+      DB_NAME: ecommerce_agents
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+volumes:
+  postgres_data:
