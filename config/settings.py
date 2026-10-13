@@ -96,7 +96,11 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
-# Legacy compatibility required by django-cloudinary-storage
+
+# Required for compatibility with django-cloudinary-storage
 STATICFILES_STORAGE = (
     "django.contrib.staticfiles.storage.StaticFilesStorage"
 )
+
+
+
