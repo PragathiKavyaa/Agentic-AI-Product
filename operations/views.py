@@ -7,6 +7,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import F, Sum
 from django.utils import timezone
 from .models import Product, Order, Conversation, ApprovalRequest
+from django.core.exceptions import ValidationError
 from .agents import (
     SupervisorAgent,
     SalesAgent,
@@ -24,47 +25,148 @@ def parse_body(request):
     try: return json.loads(request.body or b"{}")
     except (json.JSONDecodeError, UnicodeDecodeError): return None
 
-def product_dict(p):
-    return {"id":p.id,"name":p.name,"sku":p.sku,"category":p.category,"description":p.description,"price":str(p.price),"stock":p.stock,"reorder_level":p.reorder_level,"rating":str(p.rating),"image_url":p.image_url,"active":p.active}
 
-@require_http_methods(["GET","POST"])
+def product_dict(p):
+    uploaded_image_url = p.image.url if p.image else ""
+    return {
+        "id": p.id,
+        "name": p.name,
+        "sku": p.sku,
+        "category": p.category,
+        "description": p.description,
+        "price": str(p.price),
+        "stock": p.stock,
+        "reorder_level": p.reorder_level,
+        "rating": str(p.rating),
+        "image_url": uploaded_image_url or p.image_url,
+        "active": p.active,
+    }
+
+
+def get_product_request_data(request):
+    if request.content_type and request.content_type.startswith(
+        "multipart/form-data"
+    ):
+        return request.POST, request.FILES
+
+    return parse_body(request), {}
+
+
+def validate_product_image(uploaded_image):
+    if not uploaded_image:
+        return None
+
+    if uploaded_image.size > 5 * 1024 * 1024:
+        raise ValueError("Image size must not exceed 5 MB.")
+
+    image_field = Product._meta.get_field("image")
+    return image_field.clean(uploaded_image, None)
+
+
+@require_http_methods(["GET", "POST"])
 def products_api(request):
     if request.method == "GET":
         qs = Product.objects.filter(active=True).order_by("name")
         category = request.GET.get("category")
         q = request.GET.get("q")
-        if category: qs = qs.filter(category__iexact=category)
-        if q: qs = qs.filter(name__icontains=q) | qs.filter(category__icontains=q) | qs.filter(sku__icontains=q)
-        return JsonResponse({"products":[product_dict(p) for p in qs]})
-    body = parse_body(request)
-    if body is None: return HttpResponseBadRequest("Invalid JSON")
-    try:
-        p = Product.objects.create(name=body["name"].strip(), sku=body["sku"].strip(), category=body["category"].strip(), description=body.get("description",""), price=Decimal(str(body["price"])), stock=int(body.get("stock",0)), reorder_level=int(body.get("reorder_level",5)), rating=Decimal(str(body.get("rating",4.5))), image_url=body.get("image_url",""))
-    except (KeyError, ValueError, TypeError, InvalidOperation) as e:
-        return JsonResponse({"error":f"Check required fields and numeric values: {e}"}, status=400)
-    except Exception as e:
-        return JsonResponse({"error":str(e)}, status=400)
-    return JsonResponse({"product":product_dict(p)}, status=201)
 
-@require_http_methods(["GET","PUT","DELETE"])
+        if category:
+            qs = qs.filter(category__iexact=category)
+
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(name__icontains=q)
+                | Q(category__icontains=q)
+                | Q(sku__icontains=q)
+            )
+
+        return JsonResponse({
+            "products": [product_dict(p) for p in qs]
+        })
+
+    body, files = get_product_request_data(request)
+
+    if body is None:
+        return HttpResponseBadRequest("Invalid request body")
+
+    try:
+        uploaded_image = validate_product_image(files.get("image"))
+
+        p = Product(
+            name=body["name"].strip(),
+            sku=body["sku"].strip(),
+            category=body["category"].strip(),
+            description=body.get("description", ""),
+            price=Decimal(str(body["price"])),
+            stock=int(body.get("stock", 0)),
+            reorder_level=int(body.get("reorder_level", 5)),
+            rating=Decimal(str(body.get("rating", 4.5))),
+            image_url=body.get("image_url", ""),
+        )
+
+        if uploaded_image:
+            p.image = uploaded_image
+
+        p.save()
+
+    except (
+        KeyError, ValueError, TypeError,
+        InvalidOperation, ValidationError
+    ) as e:
+        return JsonResponse({
+            "error": f"Check product fields and image: {e}"
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"product": product_dict(p)}, status=201)
+
+
+@require_http_methods(["GET", "POST", "PUT", "DELETE"])
 def product_detail_api(request, product_id):
     p = get_object_or_404(Product, pk=product_id)
-    if request.method == "GET": return JsonResponse({"product":product_dict(p)})
+
+    if request.method == "GET":
+        return JsonResponse({"product": product_dict(p)})
+
     if request.method == "DELETE":
-        p.active = False; p.save(update_fields=["active","updated_at"])
-        return JsonResponse({"message":"Product archived"})
-    body = parse_body(request)
-    if body is None: return HttpResponseBadRequest("Invalid JSON")
+        p.active = False
+        p.save(update_fields=["active", "updated_at"])
+        return JsonResponse({"message": "Product archived"})
+
+    body, files = get_product_request_data(request)
+
+    if body is None:
+        return HttpResponseBadRequest("Invalid request body")
+
     try:
-        for key in ("name","sku","category","description","image_url"):
-            if key in body: setattr(p,key,body[key])
-        for key in ("price","rating"):
-            if key in body: setattr(p,key,Decimal(str(body[key])))
-        for key in ("stock","reorder_level"):
-            if key in body: setattr(p,key,int(body[key]))
+        for key in ("name", "sku", "category", "description", "image_url"):
+            if key in body:
+                setattr(p, key, body[key])
+
+        for key in ("price", "rating"):
+            if key in body:
+                setattr(p, key, Decimal(str(body[key])))
+
+        for key in ("stock", "reorder_level"):
+            if key in body:
+                setattr(p, key, int(body[key]))
+
+        uploaded_image = validate_product_image(files.get("image"))
+
+        if uploaded_image:
+            p.image = uploaded_image
+
         p.save()
-        return JsonResponse({"product":product_dict(p)})
-    except Exception as e: return JsonResponse({"error":str(e)}, status=400)
+        return JsonResponse({"product": product_dict(p)})
+
+    except (
+        ValueError, TypeError, InvalidOperation, ValidationError
+    ) as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 @require_http_methods(["GET","POST"])
 def orders_api(request):

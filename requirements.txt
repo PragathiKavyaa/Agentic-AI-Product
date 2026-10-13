@@ -12,3 +12,6 @@ langgraph>=0.2
 gunicorn
 dj-database-url
 whitenoise
+Pillow
+cloudinary
+django-cloudinary-storage

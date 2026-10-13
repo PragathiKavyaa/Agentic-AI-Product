@@ -11,6 +11,7 @@ class Product(models.Model):
     reorder_level = models.PositiveIntegerField(default=5)
     rating = models.DecimalField(max_digits=2, decimal_places=1, default=4.5)
     image_url = models.URLField(blank=True)
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
     active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):

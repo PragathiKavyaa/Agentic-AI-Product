@@ -49,7 +49,51 @@
     </section>
     <section id="catalogSection" class="page-section hidden">
       <div class="section-toolbar"><div><span class="section-overline">MERCHANDISING</span><h2>Product catalog</h2><p class="muted">Manage products available to all specialist agents.</p></div><button class="primary-btn" id="showProductForm">＋ Add product</button></div>
-      <div class="panel hidden" id="productFormPanel"><div class="panel-heading"><h3 id="productFormTitle">Add a product</h3><button class="text-btn" id="cancelProductForm">Cancel</button></div><form id="productForm" class="product-form"><input type="hidden" id="productId"><label>Product name<input id="pName" required></label><label>SKU<input id="pSku" required></label><label>Category<input id="pCategory" required placeholder="Skincare"></label><label>Price (₹)<input id="pPrice" type="number" min="0" step=".01" required></label><label>Stock<input id="pStock" type="number" min="0" required value="0"></label><label>Reorder level<input id="pReorder" type="number" min="0" required value="5"></label><label>Rating<input id="pRating" type="number" min="0" max="5" step=".1" value="4.5"></label><label>Image URL (optional)<input id="pImage" type="url"></label><label class="wide">Description<textarea id="pDescription" rows="2"></textarea></label><div class="wide form-actions"><button class="primary-btn" type="submit">Save product</button></div></form></div>
+      <div class="panel hidden" id="productFormPanel">
+        <div class="panel-heading">
+          <h3 id="productFormTitle">Add a product</h3>
+          <button class="text-btn" id="cancelProductForm">Cancel</button>
+        </div>
+        <form id="productForm" class="product-form">
+          <input type="hidden" id="productId">
+          <label>Product name<input id="pName" required></label>
+          <label>SKU<input id="pSku" required></label>
+          <label>Category<input id="pCategory" required placeholder="Skincare"></label>
+          <label>Price (₹)<input id="pPrice" type="number" min="0" step=".01" required></label>
+          <label>Stock<input id="pStock" type="number" min="0" required value="0"></label>
+          <label>Reorder level<input id="pReorder" type="number" min="0" required value="5"></label>
+          <label>Rating<input id="pRating" type="number" min="0" max="5" step=".1" value="4.5"></label>
+          
+          <label class="wide">
+            Product image (JPG, PNG, or WebP; max 5 MB)
+              <input
+                id="pImageFile"
+                name="image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              >
+          </label>
+
+      <div class="wide image-preview-wrap" id="imagePreviewWrap" hidden>
+          <img
+            id="imagePreview"
+            src=""
+            alt="Product image preview"
+            style="max-width: 180px; max-height: 180px; object-fit: contain; border-radius: 10px;"
+          >
+          <p>Image preview</p>
+        </div>
+
+      <label>
+        Image URL (optional fallback)
+        <input id="pImageUrl" type="url" placeholder="https://example.com/image.jpg">
+      </label>
+          <label class="wide">Description<textarea id="pDescription" rows="2"></textarea></label>
+          <div class="wide form-actions">
+            <button class="primary-btn" type="submit">Save product</button>
+          </div>  
+        </form>
+      </div>
       <div class="panel"><div class="catalog-toolbar"><input id="productSearch" placeholder="Search products or categories..."><span id="catalogCount" class="muted"></span></div><div id="productGrid" class="product-grid"></div></div>
     </section>
     <section id="ordersSection" class="page-section hidden"><div class="section-toolbar"><div><span class="section-overline">FULFILMENT</span><h2>Orders</h2><p class="muted">Order requests are held for review before stock is deducted.</p></div></div><div class="panel"><div id="ordersTable" class="table-wrap"></div></div></section>
