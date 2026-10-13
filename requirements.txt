@@ -11,3 +11,4 @@ langgraph>=0.2
 
 gunicorn
 whitenoise
+dj-database-url
