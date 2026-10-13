@@ -15,11 +15,19 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+
 INSTALLED_APPS = [
-    "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
-    "django.contrib.sessions", "django.contrib.messages", "cloudinary_storage", "django.contrib.staticfiles",
-    "operations", "cloudinary",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "operations",
+    "cloudinary",
+    "cloudinary_storage",
 ]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
