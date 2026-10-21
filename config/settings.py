@@ -23,7 +23,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Existing application
     "operations",
+
+    # New customer storefront application
+    "store.apps.StoreConfig",
+
+    # Cloudinary image storage
     "cloudinary",
     "cloudinary_storage",
 ]
@@ -88,6 +95,12 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+LOGIN_URL = "store:login"
+LOGIN_REDIRECT_URL = "store:home"
+LOGOUT_REDIRECT_URL = "store:home"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Cloudinary image storage for uploaded product images
 CLOUDINARY_STORAGE = {

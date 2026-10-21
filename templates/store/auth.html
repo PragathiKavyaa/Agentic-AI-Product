@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block title %}{% if mode == 'register' %}Create account{% else %}Login{% endif %} | Orchestra{% endblock %}
+{% block content %}
+<div class="auth-layout"><div class="auth-art"><span class="eyebrow">ORCHESTRA.AI</span><h1>Shopping made <em>personal.</em></h1><p>Your products, your orders, and a helpful AI shopping team in one place.</p></div>
+<div class="auth-card"><h2>{% if mode == 'register' %}Create your account{% else %}Welcome back{% endif %}</h2><p class="muted">{% if mode == 'register' %}Join us to shop and track your orders.{% else %}Log in to continue shopping.{% endif %}</p>
+<form method="post">{% csrf_token %}{{ form.non_field_errors }}
+{% for field in form %}<label>{{ field.label }}{{ field }}{% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+<button class="button full">{% if mode == 'register' %}Create account{% else %}Login{% endif %}</button></form>
+<p class="switch-auth">{% if mode == 'register' %}Already registered? <a href="{% url 'store:login' %}">Login</a>{% else %}New here? <a href="{% url 'store:register' %}">Create an account</a>{% endif %}</p></div></div>
+{% endblock %}

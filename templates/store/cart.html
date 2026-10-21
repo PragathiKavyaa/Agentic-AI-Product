@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block title %}Your cart | Orchestra{% endblock %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">YOUR SELECTION</span><h1>Shopping cart</h1></div>
+{% if rows %}<div class="cart-layout"><div class="cart-items">{% for row in rows %}<article class="cart-row">
+<div class="cart-thumb">{% if row.product.image %}<img src="{{ row.product.image.url }}" alt="">{% elif row.product.image_url %}<img src="{{ row.product.image_url }}" alt="">{% else %}✳{% endif %}</div>
+<div class="cart-product"><h3>{{ row.product.name }}</h3><p>₹{{ row.product.price }} each</p><form method="post" action="{% url 'store:update_cart' row.product.id %}" class="quantity-form">{% csrf_token %}<label>Qty <input type="number" name="quantity" min="1" max="{{ row.product.stock }}" value="{{ row.quantity }}"></label><button class="small-action">Update</button></form><form method="post" action="{% url 'store:remove_from_cart' row.product.id %}">{% csrf_token %}<button class="link-button danger">Remove</button></form></div><strong>₹{{ row.subtotal }}</strong>
+</article>{% endfor %}</div><aside class="summary"><h2>Order summary</h2><div><span>Subtotal</span><strong>₹{{ total }}</strong></div><div><span>Shipping</span><strong>Calculated at delivery</strong></div><hr><div class="total"><span>Total</span><strong>₹{{ total }}</strong></div><a class="button full" href="{% url 'store:checkout' %}">Proceed to checkout</a><a class="continue" href="{% url 'store:home' %}">Continue shopping</a></aside></div>
+{% else %}<div class="empty"><h2>Your cart is waiting for something lovely.</h2><p>Browse the catalog and add a product to get started.</p><a class="button" href="{% url 'store:home' %}">Browse products</a></div>{% endif %}
+{% endblock %}

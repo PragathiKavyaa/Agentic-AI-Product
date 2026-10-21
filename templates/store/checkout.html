@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block title %}Checkout | Orchestra{% endblock %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">ALMOST THERE</span><h1>Delivery details</h1><p>Payment method: Cash on Delivery</p></div>
+<div class="checkout-card"><form method="post">{% csrf_token %}
+<label>Full name<input name="customer_name" required value="{{ request.user.get_full_name|default:request.user.username }}"></label>
+<label>Phone number<input name="phone" type="tel" required maxlength="30" placeholder="Your contact number"></label>
+<label>Delivery address<textarea name="address" rows="4" required placeholder="House number, street, city, PIN code"></textarea></label>
+<button class="button full">Place order · Cash on Delivery</button></form><p class="muted">Stock is checked again when you place the order.</p></div>
+{% endblock %}
