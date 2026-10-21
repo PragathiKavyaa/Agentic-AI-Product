@@ -1,0 +1,82 @@
+{% extends "store/base.html" %}
+{% block title %}My orders | Orchestra{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <span class="eyebrow">YOUR ACCOUNT</span>
+    <h1>My orders</h1>
+    <p>Order updates for your account.</p>
+</div>
+
+<div class="orders-list">
+    {% for order in orders %}
+    <article class="order-card">
+
+        <div class="order-top">
+            <div>
+                <span class="muted">ORDER #{{ order.id }}</span>
+                <h3>{{ order.product.name }}</h3>
+                <span class="muted">
+                    Placed {{ order.created_at|date:"d M Y, g:i A" }}
+                </span>
+            </div>
+
+            <span class="order-status status-{{ order.status }}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        <div class="order-bottom">
+            <span>Quantity: {{ order.quantity }}</span>
+            <strong>₹{{ order.total }}</strong>
+        </div>
+
+        {% if order.shipping_address %}
+        <p class="muted">
+            Delivery address: {{ order.shipping_address }}
+        </p>
+        {% endif %}
+
+        <!-- Order tracking timeline -->
+        
+<div class="order-tracking">
+    <h3>Order Tracking</h3>
+
+    <div class="tracking-timeline">
+        <div class="tracking-step completed">
+            <span class="tracking-dot"></span>
+            <div>
+                <strong>Order Placed</strong>
+                <p class="muted">
+                    {{ order.created_at|date:"d M Y, g:i A" }}
+                </p>
+            </div>
+        </div>
+
+        {% for update in order.status_history.all %}
+        <div class="tracking-step completed">
+            <span class="tracking-dot"></span>
+            <div>
+                <strong>{{ update.get_status_display }}</strong>
+                <p class="muted">
+                    {{ update.updated_at|date:"d M Y, g:i A" }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+    </article>
+    {% empty %}
+    <div class="empty">
+        <h2>No orders yet</h2>
+        <p>Your purchases will appear here.</p>
+        <a class="button" href="{% url 'store:home' %}">
+            Start shopping
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

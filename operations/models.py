@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.db import models
 
 class Product(models.Model):
     name = models.CharField(max_length=180)
@@ -18,16 +20,76 @@ class Product(models.Model):
         return f"{self.name} ({self.sku})"
 
 class Order(models.Model):
-    STATUS_CHOICES = [("pending","Pending"),("approved","Approved"),("processing","Processing"),("shipped","Shipped"),("delivered","Delivered"),("cancelled","Cancelled")]
+    STATUS_CHOICES = [
+    ("pending", "Pending"),
+    ("approved", "Approved"),
+    ("packed", "Packed"),
+    ("dispatched", "Dispatched"),
+    ("in_transit", "In Transit"),
+    ("out_for_delivery", "Out for Delivery"),
+    ("delivered", "Delivered"),
+    ("cancelled", "Cancelled"),
+]
+
     customer_name = models.CharField(max_length=120)
     customer_email = models.EmailField(blank=True)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="orders")
+
+    # New customer account relationship
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="store_orders",
+    )
+
+    # Existing product and order details
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="orders",
+    )
     quantity = models.PositiveIntegerField(default=1)
     total = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    # New delivery details
+    shipping_address = models.TextField(blank=True)
+    customer_phone = models.CharField(max_length=30, blank=True)
+    payment_method = models.CharField(max_length=20, default="cod")
+
     created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return f"Order #{self.pk} - {self.customer_name}"
+
+class OrderStatusHistory(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="status_history",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Order.STATUS_CHOICES,
+    )
+    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["updated_at", "id"]
+
+    def __str__(self):
+        return f"Order #{self.order_id} - {self.get_status_display()}"
 
 class Conversation(models.Model):
     customer_name = models.CharField(max_length=120, default="Website visitor")
@@ -47,3 +109,4 @@ class ApprovalRequest(models.Model):
     reviewed_by = models.CharField(max_length=120, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
+
